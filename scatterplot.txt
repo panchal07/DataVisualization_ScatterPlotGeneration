@@ -1,0 +1,149 @@
+d3.csv("iris.data").then(function(data){
+
+    data.forEach(element => {
+        element.sepal_length = +element.sepal_length;
+        element.sepal_width = +element.sepal_width;
+
+        element.petal_length = +element.petal_length;
+        element.petal_width = +element.petal_width;
+
+    });
+
+var mapped_objects = data.map(function(entry){
+    return{
+        X : entry.sepal_length,
+        Y : entry.sepal_width,
+        A : entry.petal_length,
+        B : entry.petal_width,
+        P : entry.class 
+    };
+});
+console.log(data);
+console.log(mapped_objects);
+
+var x_min = d3.min(mapped_objects.map(function(entry){
+    return entry.X;
+}));
+
+var x_max = d3.max(mapped_objects.map(function(entry){
+    return entry.X;
+}));
+console.log(x_min+" "+ x_max);
+
+var y_min = d3.min(mapped_objects.map(function(entry){
+    return entry.Y;
+}));
+
+var y_max = d3.max(mapped_objects.map(function(entry){
+    return entry.Y;
+}));
+console.log(y_min+" "+ y_max);
+
+//SCATTER PLOT FOR PETAL LENGTH & WIDTH
+var a_min = d3.min(mapped_objects.map(function(entry){
+    return entry.A;
+}));
+
+var a_max = d3.max(mapped_objects.map(function(entry){
+    return entry.A;
+}));
+console.log(a_min+" "+ a_max);
+
+var b_min = d3.min(mapped_objects.map(function(entry){
+    return entry.B;
+}));
+
+var b_max = d3.max(mapped_objects.map(function(entry){
+    return entry.B;
+}));
+console.log(b_min+" "+ b_max);
+
+var padding = 25;
+var padding_petal = 30;
+
+var x_scale = d3.scaleLinear()
+                .domain([x_min,x_max])
+                .range([padding,500-padding]);
+
+var y_scale = d3.scaleLinear()
+                .domain([y_min,y_max])
+                .range([500-padding,padding]);
+
+var a_scale = d3.scaleLinear()
+                .domain([a_min,a_max])
+                .range([padding,500-padding]);
+
+var b_scale = d3.scaleLinear()
+                .domain([b_min,b_max])
+                .range([500-padding,padding]);
+
+var sepal_svg = d3.select("body").append("svg")
+            .attr("width",500)
+            .attr("height",500)
+            .style("background","grey");
+
+var petal_svg = d3.select("body").append("svg")
+                  .attr("width",500)
+                  .attr("height",500)
+                  .style("background","grey");
+
+var colorScale = d3.scaleOrdinal(d3.schemeAccent);
+
+var circles_sp = sepal_svg.selectAll("circle").data(mapped_objects);
+circles_sp.enter().append("circle").merge(circles_sp)
+          .attr("cx",function(data,index){
+              return x_scale(data.X);
+          })
+          .attr("cy",function(data,index){
+            return y_scale(data.Y);
+         })
+         .attr("fill",function(entry){
+             return colorScale(entry.P);
+         })
+         .attr("r",3)
+         .exit().remove();
+
+var circles_ptl = petal_svg.selectAll("circle").data(mapped_objects);
+circles_ptl.enter().append("circle").merge(circles_ptl)
+           .attr("cx",function(data,index){
+            return x_scale(data.A);
+            })
+          .attr("cy",function(data,index){
+            return y_scale(data.B);
+            })
+          .attr("fill",function(entry){
+            return colorScale(entry.P);
+            })
+          .attr("r",3)
+          .exit().remove();
+
+var xAxis = d3.axisBottom().scale(x_scale);
+var yAxis = d3.axisLeft().scale(y_scale);
+var aAxis = d3.axisBottom().scale(a_scale);
+var bAxis = d3.axisLeft().scale(b_scale);
+
+sepal_svg.append("g")
+            .attr("class","axis")
+            .attr("transform","translate(0,"+ (500-padding-8)+ ")")
+            .call(xAxis);
+
+sepal_svg.append("g")
+            .attr("class","axis")
+            .attr("transform", "translate(" + padding + ",0)")
+            .call(yAxis); 
+            
+petal_svg.append("g")
+            .attr("class","axis")
+            .attr("transform","translate(0,"+ (500-padding-8)+ ")")
+            .call(aAxis);
+
+petal_svg.append("g")
+            .attr("class","axis")
+            .attr("transform", "translate(" + padding + ",0)")
+            .call(bAxis); 
+})
+
+
+.catch(function(error){
+    
+})
